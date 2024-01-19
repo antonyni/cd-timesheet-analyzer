@@ -5,14 +5,12 @@ const UploadExcel = () => {
     let reader = {};
     let workbooks = {};
     const handleFileUpload = (event, type) => {
-
         file[type] = event.target.files[0];
         reader[type] = new FileReader();
 
         reader[type].onload = (e) => {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            workbooks[type] = workbook;
             // Access sheets and process data as needed.
         };
         reader[type].readAsArrayBuffer(file[type]);
