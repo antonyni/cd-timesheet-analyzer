@@ -1,19 +1,20 @@
 'use client'
 import * as XLSX from 'xlsx';
 const UploadExcel = () => {
-    let file = {};
-    let reader = {};
+
     let workbooks = {};
     const handleFileUpload = (event, type) => {
-        file[type] = event.target.files[0];
-        reader[type] = new FileReader();
+        const file = event.target.files[0];
+        const reader = new FileReader();
 
-        reader[type].onload = (e) => {
+        reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
+            workbooks[type] = workbook;
+            console.log(workbooks);
             // Access sheets and process data as needed.
         };
-        reader[type].readAsArrayBuffer(file[type]);
+        reader.readAsArrayBuffer(file);
     };
     const downloadFile = (test) => {
         let currNum = 2;
