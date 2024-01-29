@@ -30,15 +30,22 @@ const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule) => {
                     "Last Name": sheet[encodeCell(row, 1)].v,
                     "Hours Worked": normalHoursWorked,
                     "Hours Scheduled": normalHoursScheduled,
-                    "Percentage Worked": percentageDifference.toFixed(2),
+                    "Percent Worked": percentageDifference.toFixed(2),
                 }
             )
         }
     }
     const differenceSheet = XLSX.utils.json_to_sheet(difference);
-    console.log(differenceSheet);
+    differenceSheet['!cols'] = [
+        { wch: 20 }, 
+        { wch: 20 }, 
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 15 },
+    ];
     const newWorkbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(newWorkbook,differenceSheet,"Analysis");
+    console.log(differenceSheet);
     XLSX.writeFile(newWorkbook, 'Timesheet Analysis.xlsx');
 }
 
