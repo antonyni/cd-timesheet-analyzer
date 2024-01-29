@@ -17,6 +17,7 @@ const Home = () => {
   return (
     <main >
       <h1>CD Timesheet Analyzer</h1>
+      <h3>NOTE: for both exports, make sure all of the extra options are UNCHECKED</h3>
       <h2>Upload Timesheet</h2>
       <p>instructions: In the Time Clock tab, go to timesheets and export the current week</p>
       <FileInput setWorksheet={setTimesheetExcel} />
