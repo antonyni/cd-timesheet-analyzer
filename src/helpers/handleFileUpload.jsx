@@ -8,7 +8,7 @@ const handleFileUpload = (event,setWorkbook) => {
     }
     reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data,{ type: 'array' });
+        const workbook = XLSX.read(data,{ type: 'array',cellStyles:true });
         setWorkbook(workbook);
     };
 }

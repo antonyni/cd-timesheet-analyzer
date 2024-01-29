@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx'
 import hoursToDecimal from './hoursToDecimal';
 import encodeCell from './encodeCell';
 

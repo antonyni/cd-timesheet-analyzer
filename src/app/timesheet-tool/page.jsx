@@ -11,6 +11,7 @@ const Home = () => {
 
   useEffect(() => {
     if (scheduleExcel) {
+      console.log(scheduleExcel);
       simplifySchedule(scheduleExcel, setSimplifiedSchedule);
     }
   }, [scheduleExcel]);

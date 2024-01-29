@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx'
 const encodeCell = (row, column) => {
     return XLSX.utils.encode_cell({ r: row, c: column });
 }

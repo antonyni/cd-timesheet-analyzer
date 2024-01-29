@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx'
 const sortSheetByColumn = (sheet,column) => {
     const data = XLSX.utils.sheet_to_json(sheet);
     data.sort((a, b) => {
