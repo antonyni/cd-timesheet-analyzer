@@ -1,29 +1,41 @@
 'use client'
 import './page.css'
-import handleFileUpload from '@/helpers/handleFileUpload';
-import { useState,useEffect} from 'react';
-
+import FileInput from '@/components/FileInput';
+import { useState, useEffect } from 'react';
+import simplifySchedule from '@/helpers/simplifySchedule';
+import makeTimesheetAnalysis from '@/helpers/makeTimeSheetAnalysis';
 const Home = () => {
-  const [timesheet , setTimesheet] = useState();
-  const [schedule , setSchedule] = useState();
-  const upLoadAndInsert = (event) => {
-    handleFileUpload(event,setTimesheet);
-  }
-  // useEffect(()=>{
-  //   console.log(test);
+  const [timesheetExcel, setTimesheetExcel] = useState();
+  const [scheduleExcel, setScheduleExcel] = useState();
+  const [simplifiedSchedule, setSimplifiedSchedule] = useState();
 
-  // },[test]);
+  useEffect(() => {
+    if (scheduleExcel) {
+      simplifySchedule(scheduleExcel, setSimplifiedSchedule);
+    }
+  }, [scheduleExcel]);
   return (
     <main >
       <h1>CD Timesheet Analyzer</h1>
       <h2>Upload Timesheet</h2>
       <p>instructions: In the Time Clock tab, go to timesheets and export the current week</p>
-      <input type="file" onChange={event => upLoadAndInsert(event,setTimesheet)} />
+      <FileInput setWorksheet={setTimesheetExcel} />
       <h2>Upload Shift Schedule</h2>
       <p>instructions: In the Job Scheduling tab, while on the desired week click on "Actions" and then "Export week"</p>
-      <input type="file" onChange={event => upLoadAndInsert(event,setSchedule)} />
-      
-    </main>  
+      <FileInput setWorksheet={setScheduleExcel} />
+      {
+        simplifiedSchedule && timesheetExcel ?
+          <div style={{ marginTop: "1em" }}>
+            <button
+              onClick={() => makeTimesheetAnalysis(timesheetExcel, simplifiedSchedule)
+              }>
+              Make Timesheet Analysis
+            </button>
+          </div>
+
+          : ""
+      }
+    </main>
   )
 }
 

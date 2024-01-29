@@ -1,6 +1,8 @@
 'use client'
 import * as XLSX from 'xlsx';
 const UploadExcel = () => {
+    console.log(XLSX.utils.encode_cell({c:0,r:0}));
+
 
     let workbooks = {};
     const handleFileUpload = (event, type) => {
@@ -50,9 +52,12 @@ const UploadExcel = () => {
             let schedule = googleAlt["I"+currNumGoogle].v;
             book[position] = { t: 's', v: schedule, r: '<t>'+schedule+'</t>', h: schedule, w:schedule };
             currNumGoogle++;
+
         }
-        console.log(workbooks["book"]);
-        XLSX.writeFileXLSX(workbooks["book"], "UpdatedBook.xlsx");
+        console.log(book);
+        console.log(XLSX.utils.encode_cell({r:2,c:3}));
+        console.log(XLSX.utils.decode_range(book['!ref']));
+    
 
 
 

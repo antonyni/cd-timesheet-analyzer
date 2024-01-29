@@ -10,7 +10,6 @@ const handleFileUpload = (event,setWorkbook) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data,{ type: 'array' });
         setWorkbook(workbook);
-        // Access sheets and process data as needed.
     };
 }
 }
