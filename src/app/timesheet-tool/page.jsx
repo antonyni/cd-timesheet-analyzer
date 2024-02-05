@@ -8,10 +8,10 @@ const Home = () => {
   const [timesheetExcel, setTimesheetExcel] = useState();
   const [scheduleExcel, setScheduleExcel] = useState();
   const [simplifiedSchedule, setSimplifiedSchedule] = useState();
+  const [acceptablePercentage, setAcceptablePercentage] = useState(80);
 
   useEffect(() => {
     if (scheduleExcel) {
-      console.log(scheduleExcel);
       simplifySchedule(scheduleExcel, setSimplifiedSchedule);
     }
   }, [scheduleExcel]);
@@ -27,12 +27,29 @@ const Home = () => {
       <FileInput setWorksheet={setScheduleExcel} />
       {
         simplifiedSchedule && timesheetExcel ?
-          <div style={{ marginTop: "1em" }}>
-            <button
-              onClick={() => makeTimesheetAnalysis(timesheetExcel, simplifiedSchedule)
-              }>
-              Make Timesheet Analysis
-            </button>
+          <div style={{ marginTop: "1em", marginBottom: "1em" }}>
+            <div style={{ marginBottom: "1em", display: "flex" }}>
+              <h3 style={{ margin: "0 .5em 0 0" }}>Acceptable attendance percentage: </h3>
+              <input onChange={(event) => {
+                setAcceptablePercentage(event.target.value);
+              }
+              }
+                style={{ width: "30px" }} type="text" value={acceptablePercentage} />
+            </div>
+            <div>
+              <button
+                onClick={() => {
+                  if (!acceptablePercentage) {
+                    alert('set a valid percentage')
+                  }
+                  else {
+                    makeTimesheetAnalysis(timesheetExcel, simplifiedSchedule, acceptablePercentage)
+                  }
+                }
+                }>
+                Make Timesheet Analysis
+              </button>
+            </div>
           </div>
 
           : ""
