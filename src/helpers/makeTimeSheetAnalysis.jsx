@@ -56,18 +56,18 @@ const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAcc
                     pattern: 'solid',
                     fgColor: { argb: '80e76060' }
                 };
-                const nextCell = worksheet.getCell(currRow,6);
-                const firstName = worksheet.getCell(currRow,1).value;
-                const firstNameFixed = firstName.charAt(0).toUpperCase() + firstName.slice(1);
-                const lastName = worksheet.getCell(currRow,2).value;
-                const lastNameFixed = lastName.charAt(0).toUpperCase() + lastName.slice(1);
-                const hoursWorked = worksheet.getCell(currRow,3).value;
-                const hoursScheduled = worksheet.getCell(currRow,4).value;
-                nextCell.value = makeAttendanceMessage(firstNameFixed,lastNameFixed,hoursWorked,hoursScheduled,currCell.value);
-                nextCell.font = {
-                    name: 'Arial',
-                    size: 16,
-                  };
+                // const nextCell = worksheet.getCell(currRow,6);
+                // const firstName = worksheet.getCell(currRow,1).value;
+                // const firstNameFixed = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+                // const lastName = worksheet.getCell(currRow,2).value;
+                // const lastNameFixed = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+                // const hoursWorked = worksheet.getCell(currRow,3).value;
+                // const hoursScheduled = worksheet.getCell(currRow,4).value;
+                // nextCell.value = makeAttendanceMessage(firstNameFixed,lastNameFixed,hoursWorked,hoursScheduled,currCell.value);
+                // nextCell.font = {
+                //     name: 'Arial',
+                //     size: 16,
+                //   };
             }
             if(parseFloat(currCell) > 100){
                 currCell.fill = {
