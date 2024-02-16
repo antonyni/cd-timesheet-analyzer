@@ -46,7 +46,6 @@ const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAcc
     wb.xlsx.load(exceldata).then(() => {
         let worksheet = wb.getWorksheet('Analysis');
         const numRows = worksheet.rowCount;
-        worksheet.getCell(1,6).value = "Warning Message";
         for (let currRow = 2; currRow <= numRows; currRow++) {
             worksheet.getRow(currRow).height = 20;
             const currCell = worksheet.getCell(currRow, 5)

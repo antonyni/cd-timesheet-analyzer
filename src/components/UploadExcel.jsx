@@ -1,8 +1,6 @@
 'use client'
 import * as XLSX from 'xlsx'
 const UploadExcel = () => {
-    console.log(XLSX.utils.encode_cell({c:0,r:0}));
-
 
     let workbooks = {};
     const handleFileUpload = (event, type) => {

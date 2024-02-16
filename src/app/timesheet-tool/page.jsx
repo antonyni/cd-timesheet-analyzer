@@ -4,6 +4,7 @@ import FileInput from '@/components/FileInput';
 import { useState, useEffect } from 'react';
 import simplifySchedule from '@/helpers/simplifySchedule';
 import makeTimesheetAnalysis from '@/helpers/makeTimeSheetAnalysis';
+import FileInputExcelJS from '@/components/FileInputExcelJS';
 const Home = () => {
   const [timesheetExcel, setTimesheetExcel] = useState();
   const [scheduleExcel, setScheduleExcel] = useState();
@@ -25,6 +26,7 @@ const Home = () => {
       <h2>Upload Shift Schedule</h2>
       <p>instructions: In the Job Scheduling tab, while on the desired week click on "Actions" and then "Export week"</p>
       <FileInput setWorksheet={setScheduleExcel} />
+      <FileInputExcelJS setWorksheet={setScheduleExcel} />
       {
         simplifiedSchedule && timesheetExcel ?
           <div style={{ marginTop: "1em", marginBottom: "1em" }}>
