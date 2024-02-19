@@ -1,37 +1,64 @@
-import * as XLSX from 'xlsx'
 import hoursToDecimal from './hoursToDecimal';
-import encodeCell from './encodeCell';
 import * as ExcelJS from 'exceljs'
+import getDateFromString from './getDateFromString';
 
 
+const calculateHours = (untrimmedHoursString) => {
+    console.log(typeof untrimmedHoursString);
 
-const calculateHours = (sheet, row) => {
-    let start = sheet[encodeCell(row, 1)].v;
-    let end = sheet[encodeCell(row, 2)].v;
+    let stringLength = untrimmedHoursString.length;
+    let hoursString = untrimmedHoursString.substring(stringLength - 12, stringLength - 7);
 
-
-    return hoursToDecimal(end) - hoursToDecimal(start);
+    return hoursToDecimal(hoursString);
 }
 const simplifySchedule = (scheduleExcel, setSimplifiedSchedule) => {
-    if (!scheduleExcel.Sheets ||
-        !scheduleExcel.Sheets["All Employees"] ||
-        scheduleExcel.Sheets["All Employees"]["F1"].v != "Users") {
-        alert("Invalid Schedule File")
-        return ;
 
-    }
+    // if (!scheduleExcel.worksheets ||
+    //     scheduleExcel.getWorkSheet("Sheet 1")) {
+    //     alert("Invalid Schedule File");
+    //     return;
+    // }
+
+    const sheet = scheduleExcel.getWorksheet("Sheet 1");
+    console.log(sheet);
     const scheduleMap = {};
-    const sheet = scheduleExcel.Sheets["All Employees"];
-    const dimensions = XLSX.utils.decode_range(sheet["!ref"]);
-    for (let i = 1; i <= dimensions.e.r; i++) {
-        const studentName = sheet[encodeCell(i, 5)].v;
-        if (!scheduleMap[studentName]) {
-            scheduleMap[studentName] = 0;
+    scheduleMap["total"] = {};
+    const rowCount = sheet.rowCount;
+    let currentIntern = sheet.getCell(2, 1).value;
+    for (let i = 2; i <= rowCount; i++) {
+
+        const firstAndLastName = sheet.getCell(i, 1).value;
+        if (firstAndLastName && firstAndLastName != currentIntern) {
+            currentIntern = firstAndLastName;
         }
 
-        scheduleMap[studentName] += calculateHours(sheet, i)
+        const currentDateString = sheet.getCell(i, 5).value;
+        const [startofWeek, endOfWeek] = getDateFromString(currentDateString);
+        if (startofWeek == "Invalid Date") {
+            console.log(currentDateString);
+            console.log("invalid date")
+        }
 
+        const weekName = startofWeek + "-" + endOfWeek;
+        if (!scheduleMap[weekName]) {
+            scheduleMap[weekName] = {};
+        }
+
+        const currentWeekMap = scheduleMap[weekName];
+
+        const hoursString = sheet.getCell(i, 6).value;
+        const hoursThisShift = calculateHours(hoursString);
+        currentWeekMap[currentIntern] =
+            (currentWeekMap[currentIntern] ?
+                currentWeekMap[currentIntern]
+                : 0) + hoursThisShift;
+        scheduleMap.total[currentIntern] =
+            (scheduleMap.total[currentIntern] ?
+                scheduleMap.total[currentIntern]
+                : 0) + hoursThisShift;
     }
+
+    console.log(scheduleMap);
     setSimplifiedSchedule(scheduleMap);
 
 }
