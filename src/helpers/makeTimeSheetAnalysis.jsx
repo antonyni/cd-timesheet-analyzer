@@ -1,87 +1,228 @@
-// import * as ExcelJS from 'exceljs'
-// import * as FileSaver from 'file-saver'
-// import hoursToDecimal from './hoursToDecimal';
-// const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAccepted) => {
-//     const sheet = timesheetExcel["Sheets"]["All Employees"];
-//     const dimensions = XLSX.utils.decode_range(sheet["!ref"]);
-//     let difference = [];
-//     for (let row = 1; row <= dimensions.e.r; row++) {
-//         if (sheet[encodeCell(row, 0)] == "")
-//             continue;
-//         const firstAndLastName = sheet[encodeCell(row, 0)].v + " " + sheet[encodeCell(row, 1)].v;
-//         if (simplifiedSchedule[firstAndLastName]) {
-//             const decimalHoursScheduled = simplifiedSchedule[firstAndLastName]
-//             const hourHoursScheduled = ((decimalHoursScheduled / 1) < 10 ? "0" : "") + decimalHoursScheduled / 1;
-//             const minutesSimplified = Math.round(decimalHoursScheduled % 1 * 60);
-//             const minutesHoursScheduled = (minutesSimplified == 0 ?
-//                 "00" :
-//                 (minutesSimplified < 10 ?
-//                     "0" :
-//                     "") + minutesSimplified
-//             );
-//             const normalHoursScheduled = parseInt(hourHoursScheduled) + ":" + minutesHoursScheduled;
-//             const normalHoursWorked = sheet[encodeCell(row, 15)].v == "" ? "00:00" : sheet[encodeCell(row, 15)].v;
-//             const decimalHoursWorked = hoursToDecimal(normalHoursWorked);
-//             const percentageDifference = decimalHoursWorked / decimalHoursScheduled * 100;
-//             difference.push(
-//                 {
-//                     "First Name": sheet[encodeCell(row, 0)].v,
-//                     "Last Name": sheet[encodeCell(row, 1)].v,
-//                     "Hours Worked": normalHoursWorked,
-//                     "Hours Scheduled": normalHoursScheduled,
-//                     "Percent Worked": percentageDifference.toFixed(2),
-//                 }
-//             )
-//         }
-//     }
-//     const differenceSheet = XLSX.utils.json_to_sheet(difference);
-//     const newWorkbook = XLSX.utils.book_new();
-//     XLSX.utils.book_append_sheet(newWorkbook, differenceSheet, "Analysis");
-//     const exceldata = XLSX.write(newWorkbook, { type: 'buffer', bookType: 'xlsx' });
-//     const wb = new ExcelJS.Workbook();
+import * as ExcelJS from 'exceljs'
+import * as FileSaver from 'file-saver'
+import hoursToDecimal from './hoursToDecimal';
+import getDateFromString from './getDateFromString';
+import decimalToHours from './decimalToHours';
+import getWeekBefore from './getWeekBefore';
 
-//     wb.xlsx.load(exceldata).then(() => {
-//         let worksheet = wb.getWorksheet('Analysis');
-//         const numRows = worksheet.rowCount;
-//         for (let currRow = 2; currRow <= numRows; currRow++) {
-//             worksheet.getRow(currRow).height = 20;
-//             const currCell = worksheet.getCell(currRow, 5)
-//             if (parseFloat(currCell) < percentageAccepted) {
-//                 currCell.fill = {
-//                     type: 'pattern',
-//                     pattern: 'solid',
-//                     fgColor: { argb: '80e76060' }
-//                 };
-//             }
-//             if(parseFloat(currCell) > 100){
-//                 currCell.fill = {
-//                     type: 'pattern',
-//                     pattern: 'solid',
-//                     fgColor: { argb: '8042f58d' }
-//                 };
-//             }
+const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAccepted) => {
+    const workbook = new ExcelJS.Workbook();
+    let hoursWorkedMap = {};
+    hoursWorkedMap.total = 0;
 
-//         }
-//         worksheet.views = [{}];
-//         worksheet.properties.defaultColWidth = 15;
-//         worksheet.properties.defaultRowHeight = 20;
-//         wb.xlsx.writeBuffer().then(data => {
-//             const blob = new Blob([data]);
-//             FileSaver.saveAs(blob, "Timesheet Analysis.xlsx");
-//         });
-//     })
-// }
+    const timeSheet = timesheetExcel.getWorksheet("All Employees");
 
-// const makeAttendanceMessage = (firstName, lastName,hoursWorked,hoursScheduled,percentageWorked) => {
-//     return (
-//         "Hello " + firstName + " " + lastName + ",\n\n" +
-//         "We are writing to address your attendance during the internship program at Code Differently. This past week, " +
-//         "your attendance percentage stands at " + percentageWorked +"%, reflecting " + hoursWorked + " hours worked out of " + hoursScheduled + " hours scheduled. \n\n" +
-//         "Consistent attendance is critical to your success in the program and reflects your commitment to your professional development. Your attendance record will be shared with New Castle County, our employer partner. \n\n" + 
-//         "Improving your attendance is vital for your continued participation in the program and potential employment opportunities. Please prioritize attendance and communicate any challenges promptly.\n\n" + 
-//         "Thank you for your attention to this matter. \n\n" +
-//         "Best regards,\n\n" + 
-//         "Code Differently"
-//     );
-// }
-// export default makeTimesheetAnalysis;
+    let firstName = timeSheet.getCell(2, 1).value;
+    let lastName = timeSheet.getCell(2, 2).value
+    let currentIntern = firstName + " " + lastName;
+
+    for (let row = 2; row <= timeSheet.rowCount; row++) {
+
+        const tempFirstName = timeSheet.getCell(row, 1).value;
+        const tempLastName = timeSheet.getCell(row, 2).value;
+        if (tempFirstName &&
+            (tempFirstName + " " + tempLastName != currentIntern)) {
+            currentIntern = tempFirstName + " " + tempLastName;
+            firstName = tempFirstName;
+            lastName = tempLastName
+        }
+
+        const weekName = getDateFromString(timeSheet.getCell(row, 5).value);
+        const weekSchedule = simplifiedSchedule[weekName];
+
+        if (weekSchedule && weekSchedule[currentIntern]) {
+            if (!hoursWorkedMap[weekName]) {
+                setUpNewSheet(hoursWorkedMap, weekName, workbook);
+            }
+
+            const currentWeek = hoursWorkedMap[weekName];
+            if (!currentWeek[currentIntern]) {
+                const currentInternData = {
+                    fullName: currentIntern,
+                    firstName: firstName,
+                    lastName: lastName,
+
+                }
+                const workBookData = {
+                    workbook: workbook,
+                    weekName: weekName,
+                    timeSheet: timeSheet,
+                    currentWeek: currentWeek,
+                    hoursWorkedMap: hoursWorkedMap,
+                    simplifiedSchedule: simplifiedSchedule,
+                }
+
+                populateRow(workBookData, currentInternData, percentageAccepted, row);
+                // currSheet.getCell(2, 9).value = hoursWorkedMap[weekName].total;
+                // currSheet.getCell(2, 10).value = simplifiedSchedule[weekName].totalScheduledHours;
+                // currSheet.getCell(2, 11).value = (hoursWorkedMap[weekName].total / simplifiedSchedule[weekName].totalScheduledHours * 100).toFixed(2);
+            }
+
+        }
+    }
+    workbook.eachSheet((worksheet) => {
+        const currWeek = worksheet.name;
+
+        for (let row = 2; row <= worksheet.rowCount; row++) {
+            const firstName = worksheet.getCell(row, 1).value;
+            const lastName = worksheet.getCell(row, 2).value;
+            const fullName = firstName + ' ' + lastName;
+            processChangeFromPreviousWeek(currWeek, worksheet, fullName, row, hoursWorkedMap);
+        }
+    })
+
+
+    workbook.xlsx.writeBuffer().then(data => {
+        const blob = new Blob([data]);
+        FileSaver.saveAs(blob, "Timesheet Analysis.xlsx");
+    });
+
+}
+
+const setUpNewSheet = (hoursWorkedMap, weekName, workbook) => {
+    hoursWorkedMap[weekName] = {};
+    hoursWorkedMap[weekName].total = 0;
+    const sheet = workbook.addWorksheet(weekName);
+    sheet.views = [{}];
+    sheet.properties.defaultColWidth = 15;
+    sheet.properties.defaultRowHeight = 20;
+    setUpColumns(sheet);
+}
+
+const setUpColumns = (worksheet) => {
+    const firstName = worksheet.getColumn(1);
+    firstName.header = "First Name";
+    firstName.key = "firstName";
+
+    const lastName = worksheet.getColumn(2);
+    lastName.header = "Last Name";
+    lastName.key = "lastName";
+
+    const hoursWorked = worksheet.getColumn(3);
+    hoursWorked.header = "Hours Worked";
+    hoursWorked.key = "hoursWorked";
+
+    const hoursScheduled = worksheet.getColumn(4);
+    hoursScheduled.header = "Hours Scheduled";
+    hoursScheduled.key = "hoursScheduled";
+
+
+    const percentWorked = worksheet.getColumn(5);
+    percentWorked.header = "Percent Worked";
+    percentWorked.key = "percentWorked";
+
+    const changeFromPreviousWeek = worksheet.getColumn(6);
+    changeFromPreviousWeek.header = "Percent Change from Last Week";
+    changeFromPreviousWeek.key = "changeFromPreviousWeek";
+    changeFromPreviousWeek.width = 25;
+
+    const taAssigned = worksheet.getColumn(7);
+    taAssigned.header = "TA";
+    taAssigned.key = "ta";
+
+    const totalWorked = worksheet.getColumn(9);
+    totalWorked.header = "Total Worked";
+    totalWorked.key = "totalWorked";
+
+    const totalScheduled = worksheet.getColumn(10);
+    totalScheduled.header = "Total Scheduled";
+    totalScheduled.key = "totalScheduled";
+
+    const totalPercentWorked = worksheet.getColumn(11);
+    totalPercentWorked.header = "Percent Worked";
+    totalPercentWorked.key = "totalPercentWorked";
+
+    const totalPercentChange = worksheet.getColumn(12);
+    totalPercentChange.header = "Total Percent Change from Last Week";
+    totalPercentChange.key = "totalPercentChange";
+    totalPercentChange.width = 30;
+
+
+}
+
+const populateRow = (workBookData, currentInternData, percentageAccepted, row) => {
+    const currSheet = workBookData.workbook.getWorksheet(workBookData.weekName);
+
+    const [normalHoursWorked, normalHoursScheduled, percentageDifference] = processHoursData(row, workBookData.timeSheet, workBookData.currentWeek, currentInternData.fullName, workBookData.weekName, workBookData.simplifiedSchedule);
+
+
+    currSheet.addRow({
+        firstName: currentInternData.firstName,
+        lastName: currentInternData.lastName,
+        hoursWorked: normalHoursWorked,
+        hoursScheduled: normalHoursScheduled,
+        percentWorked: percentageDifference,
+
+    })
+
+    colorPercentageCell(currSheet, percentageAccepted);
+
+}
+
+const processHoursData = (row, timeSheet, currentWeek, currentIntern, weekName, simplifiedSchedule) => {
+    const potentialWorkHours = timeSheet.getCell(row, 15).value;
+    const workHours = potentialWorkHours ? potentialWorkHours : "00:00";
+
+    currentWeek[currentIntern] = { hoursWorked: hoursToDecimal(workHours) };
+    const decimalHoursScheduled = simplifiedSchedule[weekName][currentIntern];
+    const normalHoursScheduled = decimalToHours(decimalHoursScheduled);
+
+    const normalHoursWorked = workHours;
+    const decimalHoursWorked = hoursToDecimal(normalHoursWorked);
+    currentWeek.total += decimalHoursWorked;
+    const percentageDifference = (decimalHoursWorked / decimalHoursScheduled * 100).toFixed(2);
+    currentWeek[currentIntern].percentageDifference = percentageDifference;
+    return [normalHoursWorked, normalHoursScheduled, percentageDifference];
+}
+
+const processChangeFromPreviousWeek = (currWeek, worksheet, fullName, row, hoursWorkedMap) => {
+    const prevWeek = getWeekBefore(currWeek);
+    let percentageDifferenceOfPreviousWeek;
+    if (hoursWorkedMap[prevWeek] && hoursWorkedMap[prevWeek][fullName]) {
+        percentageDifferenceOfPreviousWeek = hoursWorkedMap[prevWeek][fullName].percentageDifference;
+    }
+    const percentageDifferenceOfCurrentWeek = hoursWorkedMap[currWeek][fullName].percentageDifference;
+    let differenceFromWeeks = percentageDifferenceOfPreviousWeek ?
+        (percentageDifferenceOfCurrentWeek - percentageDifferenceOfPreviousWeek).toFixed(2) : "";
+
+    const currCell = worksheet.getCell(row, 6);
+    currCell.value = differenceFromWeeks;
+
+    if (currCell <= -15) {
+        currCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '80e76060' }
+        };
+    }
+    if (currCell > 15) {
+        currCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '8042f58d' }
+        };
+    }
+
+    return differenceFromWeeks;
+}
+
+const colorPercentageCell = (currSheet, percentageAccepted) => {
+    const currCell = currSheet.getCell(currSheet.rowCount, 5)
+    if (parseFloat(currCell) < percentageAccepted) {
+        currCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '80e76060' }
+        };
+    }
+    if (parseFloat(currCell) > 100) {
+        currCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '8042f58d' }
+        };
+    }
+}
+
+
+export default makeTimesheetAnalysis;

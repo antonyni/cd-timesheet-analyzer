@@ -20,9 +20,9 @@ const simplifySchedule = (scheduleExcel, setSimplifiedSchedule) => {
     // }
 
     const sheet = scheduleExcel.getWorksheet("Sheet 1");
-    console.log(sheet);
     const scheduleMap = {};
     scheduleMap["total"] = {};
+    scheduleMap.total.totalScheduledHours = 0;
     const rowCount = sheet.rowCount;
     let currentIntern = sheet.getCell(2, 1).value;
     for (let i = 2; i <= rowCount; i++) {
@@ -33,21 +33,18 @@ const simplifySchedule = (scheduleExcel, setSimplifiedSchedule) => {
         }
 
         const currentDateString = sheet.getCell(i, 5).value;
-        const [startofWeek, endOfWeek] = getDateFromString(currentDateString);
-        if (startofWeek == "Invalid Date") {
-            console.log(currentDateString);
-            console.log("invalid date")
-        }
-
-        const weekName = startofWeek + "-" + endOfWeek;
+        const weekName = getDateFromString(currentDateString);
         if (!scheduleMap[weekName]) {
             scheduleMap[weekName] = {};
+            scheduleMap[weekName].totalScheduledHours = 0;
         }
 
         const currentWeekMap = scheduleMap[weekName];
 
         const hoursString = sheet.getCell(i, 6).value;
         const hoursThisShift = calculateHours(hoursString);
+        currentWeekMap.totalScheduledHours += hoursThisShift;
+        scheduleMap.total.totalScheduledHours  += hoursThisShift;
         currentWeekMap[currentIntern] =
             (currentWeekMap[currentIntern] ?
                 currentWeekMap[currentIntern]

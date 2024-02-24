@@ -43,7 +43,7 @@ const Home = () => {
                     alert('set a valid percentage')
                   }
                   else {
-                    // makeTimesheetAnalysis(timesheetExcel, simplifiedSchedule, acceptablePercentage)
+                    makeTimesheetAnalysis(timesheetExcel, simplifiedSchedule, acceptablePercentage)
                   }
                 }
                 }>
