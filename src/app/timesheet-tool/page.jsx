@@ -32,7 +32,7 @@ const Home = () => {
       <p>instructions: In the Time Clock tab, go to timesheets and export the current week</p>
       <FileInput setWorksheet={setTimesheetExcel} />
       <h2>Upload Shift Schedule</h2>
-      <p>instructions: In the Job Scheduling tab, while on the desired week click on "Actions" and then "Export week"</p>
+      <p>instructions: In the Job Scheduling tab, click on View options, then List view, then choose the time frame and export.</p>
       <FileInput setWorksheet={setScheduleExcel} />
       <h2>Upload TA Assignments</h2>
       <p>instructions: Upload an excel file with the exact spelling in ConnectTeams of the interns' first and last names in the first column and the TA in the second column</p>
