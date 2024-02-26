@@ -4,7 +4,6 @@ import getDateFromString from './getDateFromString';
 
 
 const calculateHours = (untrimmedHoursString) => {
-    console.log(typeof untrimmedHoursString);
 
     let stringLength = untrimmedHoursString.length;
     let hoursString = untrimmedHoursString.substring(stringLength - 12, stringLength - 7);
@@ -21,8 +20,10 @@ const simplifySchedule = (scheduleExcel, setSimplifiedSchedule) => {
 
     const sheet = scheduleExcel.getWorksheet("Sheet 1");
     const scheduleMap = {};
-    scheduleMap["total"] = {};
-    scheduleMap.total.totalScheduledHours = 0;
+    scheduleMap.total = {
+        totalHoursScheduled:0,
+        interns:{},
+    };
     const rowCount = sheet.rowCount;
     let currentIntern = sheet.getCell(2, 1).value;
     for (let i = 2; i <= rowCount; i++) {
@@ -33,29 +34,32 @@ const simplifySchedule = (scheduleExcel, setSimplifiedSchedule) => {
         }
 
         const currentDateString = sheet.getCell(i, 5).value;
-        const weekName = getDateFromString(currentDateString);
-        if (!scheduleMap[weekName]) {
-            scheduleMap[weekName] = {};
-            scheduleMap[weekName].totalScheduledHours = 0;
+        if (currentDateString) {
+            const weekName = getDateFromString(currentDateString);
+            if (!scheduleMap[weekName]) {
+                scheduleMap[weekName] = {
+                    totalHoursScheduled:0,
+                    interns:{},
+                };
+            }
+
+            const currentWeekMap = scheduleMap[weekName];
+
+            const hoursString = sheet.getCell(i, 6).value;
+            const hoursThisShift = calculateHours(hoursString);
+            currentWeekMap.totalHoursScheduled += hoursThisShift;
+            scheduleMap.total.totalHoursScheduled += hoursThisShift;
+            currentWeekMap.interns[currentIntern] =
+                (currentWeekMap.interns[currentIntern] ?
+                    currentWeekMap.interns[currentIntern]
+                    : 0) + hoursThisShift;
+            scheduleMap.total.interns[currentIntern] =
+                (scheduleMap.total.interns[currentIntern] ?
+                    scheduleMap.total.interns[currentIntern]
+                    : 0) + hoursThisShift;
         }
 
-        const currentWeekMap = scheduleMap[weekName];
-
-        const hoursString = sheet.getCell(i, 6).value;
-        const hoursThisShift = calculateHours(hoursString);
-        currentWeekMap.totalScheduledHours += hoursThisShift;
-        scheduleMap.total.totalScheduledHours  += hoursThisShift;
-        currentWeekMap[currentIntern] =
-            (currentWeekMap[currentIntern] ?
-                currentWeekMap[currentIntern]
-                : 0) + hoursThisShift;
-        scheduleMap.total[currentIntern] =
-            (scheduleMap.total[currentIntern] ?
-                scheduleMap.total[currentIntern]
-                : 0) + hoursThisShift;
     }
-
-    console.log(scheduleMap);
     setSimplifiedSchedule(scheduleMap);
 
 }
