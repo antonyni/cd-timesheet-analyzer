@@ -39,7 +39,7 @@ const Home = () => {
       <FileInput setWorksheet={setTaExcel} />
       
       {
-        simplifiedSchedule && timesheetExcel && taMap?
+        simplifiedSchedule && timesheetExcel?
           <div style={{ marginTop: "1em", marginBottom: "1em" }}>
             <div style={{ marginBottom: "1em", display: "flex" }}>
               <h3 style={{ margin: "0 .5em 0 0" }}>Acceptable attendance percentage: </h3>

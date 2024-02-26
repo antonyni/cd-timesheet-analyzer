@@ -7,6 +7,9 @@ import getWeekBefore from './getWeekBefore';
 
 const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAccepted, taMap) => {
     const workbook = new ExcelJS.Workbook();
+    if(!taMap){
+        taMap = {};
+    }
     const hoursWorkedMap = {
         total: {
             total: {
