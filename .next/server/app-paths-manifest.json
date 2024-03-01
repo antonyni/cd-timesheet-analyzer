@@ -1,3 +1,4 @@
 {
-  "/timesheet-tool/page": "app/timesheet-tool/page.js"
+  "/page": "app/page.js",
+  "/codio-tool/page": "app/codio-tool/page.js"
 }

@@ -276,7 +276,7 @@ const colorPercentageCell = (currSheet, percentageAccepted) => {
         currCell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: '8042f58d' }
+            fgColor: { argb: '80ffff00' }
         };
     }
     if (parseFloat(changeFromPreviousWeek.value) < -15) {

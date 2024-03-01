@@ -1,8 +1,8 @@
-// File: /Users/student/dev/cd-timesheet-analyzer/src/app/timesheet-tool/page.jsx
-import * as entry from '../../../../src/app/timesheet-tool/page.js'
+// File: /Users/student/dev/cd-timesheet-analyzer/src/app/page.jsx
+import * as entry from '../../../src/app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../src/app/timesheet-tool/page.js')
+type TEntry = typeof import('../../../src/app/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{
