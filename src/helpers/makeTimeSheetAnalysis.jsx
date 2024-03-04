@@ -30,8 +30,8 @@ const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAcc
     initializeHoursWorkedMap(hoursWorkedMap, simplifiedSchedule);
     populateHoursWorkedMap(timesheetExcel, hoursWorkedMap, simplifiedSchedule, percentageAccepted);
     processChangeFromPreviousWeek(hoursWorkedMap);
+    console.log(hoursWorkedMap["1-1-2024 to 1-7-2024"]["interns"]) 
     makeSheets(workbook, hoursWorkedMap, percentageAccepted, taMap);
-
     workbook.xlsx.writeBuffer().then(data => {
         const blob = new Blob([data]);
         FileSaver.saveAs(blob, "Timesheet Analysis.xlsx");
