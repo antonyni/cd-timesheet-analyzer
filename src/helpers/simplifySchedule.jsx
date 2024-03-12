@@ -34,7 +34,7 @@ const simplifySchedule = (scheduleExcel, setSimplifiedSchedule) => {
         }
 
         const currentDateString = sheet.getCell(i, 5).value;
-        if (currentDateString) {
+        if (currentDateString && currentIntern) {
             const weekName = getDateFromString(currentDateString);
             if (!scheduleMap[weekName]) {
                 scheduleMap[weekName] = {

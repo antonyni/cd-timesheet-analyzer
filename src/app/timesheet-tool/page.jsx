@@ -10,8 +10,6 @@ const Home = () => {
   const [scheduleExcel, setScheduleExcel] = useState();
   const [simplifiedSchedule, setSimplifiedSchedule] = useState();
   const [acceptablePercentage, setAcceptablePercentage] = useState(80);
-  const [taExcel, setTaExcel] = useState();
-  const [taMap, setTaMap] = useState();
 
   useEffect(() => {
     if (scheduleExcel) {
@@ -19,11 +17,6 @@ const Home = () => {
     }
   }, [scheduleExcel]);
 
-  useEffect(() => {
-    if (taExcel) {
-      makeTaMap(taExcel, setTaMap);
-    }
-  }, [taExcel]);
   return (
     <main >
       <h1>CD Timesheet Analyzer</h1>
@@ -34,9 +27,6 @@ const Home = () => {
       <h2>Upload Shift Schedule</h2>
       <p>instructions: In the Job Scheduling tab, click on View options, then List view, then choose the time frame and export.</p>
       <FileInput setWorksheet={setScheduleExcel} />
-      <h2>Upload TA Assignments</h2>
-      <p>instructions: Upload an excel file with the exact spelling in ConnectTeams of the interns' first and last names in the first column and the TA in the second column</p>
-      <FileInput setWorksheet={setTaExcel} />
       
       {
         simplifiedSchedule && timesheetExcel?
@@ -56,7 +46,7 @@ const Home = () => {
                     alert('set a valid percentage')
                   }
                   else {
-                    makeTimesheetAnalysis(timesheetExcel, simplifiedSchedule, acceptablePercentage, taMap);
+                    makeTimesheetAnalysis(timesheetExcel, simplifiedSchedule, acceptablePercentage);
                   }
                 }
                 }>
