@@ -10,3 +10,4 @@ const makeTaMap = (taExcel, setTaMap) => {
 }
 
 export default makeTaMap;
+

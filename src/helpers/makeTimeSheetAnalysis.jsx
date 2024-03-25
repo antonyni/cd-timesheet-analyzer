@@ -5,7 +5,7 @@ import populateHoursWorkedMap from './populateHoursWorkedMap';
 import makeSheets from './makeSheets';
 import processChangeFromPreviousWeek from './processChangeFromPreviousWeek';
 
-const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAccepted) => {
+const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAccepted, teamMap) => {
     const taMap = {};
     const workbook = new ExcelJS.Workbook();
     const hoursWorkedMap = {
@@ -28,8 +28,11 @@ const makeTimesheetAnalysis = (timesheetExcel, simplifiedSchedule, percentageAcc
     initializeHoursWorkedMap(hoursWorkedMap, simplifiedSchedule);
     populateHoursWorkedMap(timesheetExcel, hoursWorkedMap, simplifiedSchedule, percentageAccepted, taMap);
     processChangeFromPreviousWeek(hoursWorkedMap);
-    makeSheets(workbook, hoursWorkedMap, percentageAccepted, taMap);
-    console.log(hoursWorkedMap);
+    makeSheets(workbook, hoursWorkedMap, percentageAccepted, taMap, teamMap);
+    workbook.worksheets[workbook.worksheets.length - 1].orderNo = 1;
+    workbook.worksheets[0].orderNo = 2;
+
+
     workbook.xlsx.writeBuffer().then(data => {
         const blob = new Blob([data]);
         FileSaver.saveAs(blob, "Timesheet Analysis.xlsx");
